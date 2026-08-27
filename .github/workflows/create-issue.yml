@@ -1,0 +1,29 @@
+name: Create Issue
+
+on:
+  workflow_dispatch:
+    inputs:
+        title:
+            description: 'Title of the issue to create'
+            required: true
+            default: 'New issue from workflow'
+        body:
+            description: 'Body of the issue to create'
+            required: true
+            default: 'Created from a workflow_dispatch run'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3.3.0
+        
+      - name: Create issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_TITLE: ${{ inputs.title || 'New issue from workflow' }}
+          ISSUE_BODY: ${{ inputs.body || format('Created by {0} run {1}', github.workflow, github.run_id) }}
+        run: gh issue create --title "$ISSUE_TITLE" --body "$ISSUE_BODY" --repo ${{ github.repository }}
